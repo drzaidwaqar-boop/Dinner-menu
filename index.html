@@ -17,6 +17,7 @@
       --text-muted: #64748b;
       --border: #e2e8f0;
       --active: #fef3c7;
+      --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -55,6 +56,41 @@
       border-color: var(--primary);
     }
     
+    /* Dessert Card */
+    .dessert-card {
+      background: #fffbeb;
+      border: 1.5px dashed #f59e0b;
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .dessert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #92400e;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .dessert-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .dessert-select, .dessert-input {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #fcd34d;
+      border-radius: 6px;
+      background: #ffffff;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .dessert-select { flex: 1; }
+    .dessert-input { flex: 1; min-width: 140px; }
+
+    /* Day Card */
     .day-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -63,7 +99,7 @@
       margin-bottom: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.35rem;
     }
     .day-card.today {
       border: 2px solid var(--primary);
@@ -91,14 +127,111 @@
       font-size: 1.05rem;
       font-weight: 600;
       color: var(--text);
-      margin-top: 0.25rem;
     }
     .dish-sides {
       font-size: 0.85rem;
       color: var(--text-muted);
     }
+    .dish-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.35rem;
+    }
+    .btn-swap {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--primary-dark);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-swap:hover {
+      background: #fff7ed;
+      border-color: var(--primary);
+    }
 
-    /* Grocery List Styles */
+    /* Modal for Swapping */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .modal-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .swap-option {
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.4rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .swap-option:hover {
+      background: var(--active);
+      border-color: var(--primary);
+    }
+    .swap-option strong { display: block; color: var(--primary-dark); }
+    .modal-close {
+      margin-top: 0.75rem;
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--border);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Grocery Styles & Form */
+    .grocery-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      background: var(--card);
+      padding: 0.75rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .grocery-form input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .grocery-form button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 0.9rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
     .grocery-section {
       background: var(--card);
       border: 1px solid var(--border);
@@ -119,11 +252,17 @@
     .grocery-item {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      justify-content: space-between;
       padding: 0.45rem 0;
       font-size: 0.95rem;
+    }
+    .grocery-item-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       cursor: pointer;
       user-select: none;
+      flex: 1;
     }
     .grocery-item input[type="checkbox"] {
       width: 1.15rem;
@@ -135,10 +274,19 @@
       text-decoration: line-through;
       color: var(--text-muted);
     }
+    .delete-item-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0 0.4rem;
+    }
     .grocery-actions {
       display: flex;
-      justify-content: flex-end;
-      margin-bottom: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
     }
     .reset-btn {
       background: transparent;
@@ -197,20 +345,38 @@
   </div>
 
   <!-- Menu View -->
-  <div id="schedule-container"></div>
+  <div id="schedule-container">
+    <div class="dessert-card" id="dessert-card-container"></div>
+    <div id="days-container"></div>
+  </div>
 
   <!-- Grocery View -->
   <div id="grocery-container" style="display: none;">
+    <form class="grocery-form" onsubmit="handleAddGroceryItem(event)">
+      <input type="text" id="custom-grocery-input" placeholder="Add extra grocery item..." required />
+      <button type="submit">Add</button>
+    </form>
     <div class="grocery-actions">
+      <span style="font-size:0.8rem; color:var(--text-muted);" id="grocery-week-indicator"></span>
       <button class="reset-btn" onclick="resetCheckedItems()">Clear Checked Items</button>
     </div>
     <div id="grocery-list-content"></div>
   </div>
 
+  <!-- Swap Modal -->
+  <div class="modal-overlay" id="swap-modal">
+    <div class="modal">
+      <h3 id="modal-title">Swap Dish</h3>
+      <p class="modal-subtitle">Pick another scheduled fresh dish from Weeks 1–4 to swap with:</p>
+      <div id="swap-options-list"></div>
+      <button class="modal-close" onclick="closeSwapModal()">Cancel</button>
+    </div>
+  </div>
+
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <button class="nav-tab active" id="tab-menu" onclick="switchView('menu')">
-      📅 Menu
+      🍽️ Menu
     </button>
     <button class="nav-tab" id="tab-grocery" onclick="switchView('grocery')">
       🛒 Grocery List
@@ -218,7 +384,7 @@
   </nav>
 
   <script>
-    const menuData = {
+    const defaultMenuData = {
       1: {
         sat: { dish: "Chicken Pulao", sides: "Served with Raita", cook: true },
         mon: { dish: "Desi-Style Chicken Pasta", sides: "Spicy stir-fry macaroni", cook: true },
@@ -261,6 +427,21 @@
       }
     };
 
+    // Load active meals from storage or fallback to defaults
+    function getMenuData() {
+      const stored = localStorage.getItem('monthly_menu_data');
+      if (stored) {
+        try { return JSON.parse(stored); } catch (e) { }
+      }
+      return JSON.parse(JSON.stringify(defaultMenuData));
+    }
+
+    function saveMenuData(data) {
+      localStorage.setItem('monthly_menu_data', JSON.stringify(data));
+    }
+
+    let currentMenuData = getMenuData();
+
     function getCurrentWeek() {
       const now = new Date();
       const start = new Date(now.getFullYear(), 0, 1);
@@ -290,26 +471,74 @@
       const currentAutoWeek = getCurrentWeek();
       document.getElementById('current-cycle').innerText = 
         activeWeek === currentAutoWeek ? `Week ${activeWeek} (Current Active Cycle)` : `Viewing Week ${activeWeek}`;
+      document.getElementById('grocery-week-indicator').innerText = `Week ${activeWeek} Grocery List`;
     }
 
+    /* Dessert Functions */
+    function getDessert(weekNum) {
+      const saved = localStorage.getItem(`dessert_week_${weekNum}`);
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      return { choice: "Fruit Trifle", custom: "" };
+    }
+
+    function setDessertChoice(weekNum, choice) {
+      const current = getDessert(weekNum);
+      current.choice = choice;
+      localStorage.setItem(`dessert_week_${weekNum}`, JSON.stringify(current));
+      renderDessertCard();
+    }
+
+    function setDessertCustomText(weekNum, text) {
+      const current = getDessert(weekNum);
+      current.custom = text;
+      localStorage.setItem(`dessert_week_${weekNum}`, JSON.stringify(current));
+    }
+
+    function renderDessertCard() {
+      const dessert = getDessert(activeWeek);
+      const options = ["Fruit Trifle", "Cake", "Vermicelli", "Cookies", "Other"];
+      const isOther = dessert.choice === "Other";
+
+      const html = `
+        <div class="dessert-header">
+          <span>🍰 Weekly Dessert Treat</span>
+          <span style="font-size:0.75rem; font-weight: normal; color: #b45309;">1x per week</span>
+        </div>
+        <div class="dessert-controls">
+          <select class="dessert-select" onchange="setDessertChoice(${activeWeek}, this.value)">
+            ${options.map(opt => `<option value="${opt}" ${dessert.choice === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+          </select>
+          ${isOther ? `<input type="text" class="dessert-input" placeholder="Enter dessert name..." value="${dessert.custom || ''}" oninput="setDessertCustomText(${activeWeek}, this.value)" />` : ''}
+        </div>
+      `;
+      document.getElementById('dessert-card-container').innerHTML = html;
+    }
+
+    /* Menu & Day Rendering */
     function renderMenu() {
+      renderDessertCard();
       const currentAutoWeek = getCurrentWeek();
-      const week = menuData[activeWeek];
+      const week = currentMenuData[activeWeek];
       const days = [
-        { name: "Saturday", dayId: 6, ...week.sat, type: "cook" },
-        { name: "Sunday", dayId: 0, dish: `${week.sat.dish} (Leftovers)`, sides: week.sat.sides, type: "leftover" },
-        { name: "Monday", dayId: 1, ...week.mon, type: "cook" },
-        { name: "Tuesday", dayId: 2, dish: `${week.mon.dish} (Leftovers)`, sides: week.mon.sides, type: "leftover" },
-        { name: "Wednesday", dayId: 3, ...week.wed, type: "cook" },
-        { name: "Thursday", dayId: 4, dish: `${week.wed.dish} (Leftovers)`, sides: week.wed.sides, type: "leftover" },
-        { name: "Friday", dayId: 5, dish: "Dining Out / Takeout 🎉", sides: "Kitchen closed! No cooking or dishes.", type: "out" }
+        { name: "Saturday", dayKey: "sat", dayId: 6, ...week.sat, type: "cook" },
+        { name: "Sunday", dayKey: "sun", dayId: 0, dish: `${week.sat.dish} (Leftovers)`, sides: week.sat.sides, type: "leftover" },
+        { name: "Monday", dayKey: "mon", dayId: 1, ...week.mon, type: "cook" },
+        { name: "Tuesday", dayKey: "tue", dayId: 2, dish: `${week.mon.dish} (Leftovers)`, sides: week.mon.sides, type: "leftover" },
+        { name: "Wednesday", dayKey: "wed", dayId: 3, ...week.wed, type: "cook" },
+        { name: "Thursday", dayKey: "thu", dayId: 4, dish: `${week.wed.dish} (Leftovers)`, sides: week.wed.sides, type: "leftover" },
+        { name: "Friday", dayKey: "fri", dayId: 5, dish: "Dining Out / Takeout 🍕", sides: "Kitchen closed! No cooking or dishes.", type: "out" }
       ];
 
-      const container = document.getElementById('schedule-container');
+      const container = document.getElementById('days-container');
       container.innerHTML = days.map(d => {
         const isToday = (activeWeek === currentAutoWeek && d.dayId === todayIndex);
         let badgeLabel = d.type === "cook" ? "Cook Fresh" : (d.type === "leftover" ? "Leftovers" : "Eat Out");
         let badgeClass = `badge-${d.type}`;
+        let swapAction = d.type === "cook" 
+          ? `<div class="dish-footer"><button class="btn-swap" onclick="openSwapModal(${activeWeek}, '${d.dayKey}')">⇄ Swap with another day</button></div>` 
+          : '';
 
         return `
           <div class="day-card ${isToday ? 'today' : ''}">
@@ -319,9 +548,100 @@
             </div>
             <div class="dish-name">${d.dish}</div>
             <div class="dish-sides">${d.sides}</div>
+            ${swapAction}
           </div>
         `;
       }).join('');
+    }
+
+    /* Swap Modal Logic */
+    let swapSource = null;
+
+    function openSwapModal(weekNum, dayKey) {
+      swapSource = { week: weekNum, day: dayKey };
+      const currentDish = currentMenuData[weekNum][dayKey].dish;
+      const dayNames = { sat: "Saturday", mon: "Monday", wed: "Wednesday" };
+      
+      document.getElementById('modal-title').innerText = `Swap ${dayNames[dayKey]} (W${weekNum}): ${currentDish}`;
+
+      const optionsList = document.getElementById('swap-options-list');
+      let html = '';
+
+      for (let w = 1; w <= 4; w++) {
+        ['sat', 'mon', 'wed'].forEach(day => {
+          if (w === weekNum && day === dayKey) return;
+          const targetDish = currentMenuData[w][day];
+          html += `
+            <div class="swap-option" onclick="executeSwap(${w}, '${day}')">
+              <strong>Week ${w} • ${dayNames[day]}</strong>
+              ${targetDish.dish} <span style="font-size:0.75rem; color:var(--text-muted);">(${targetDish.sides})</span>
+            </div>
+          `;
+        });
+      }
+
+      optionsList.innerHTML = html;
+      document.getElementById('swap-modal').style.display = 'flex';
+    }
+
+    function closeSwapModal() {
+      document.getElementById('swap-modal').style.display = 'none';
+      swapSource = null;
+    }
+
+    function executeSwap(targetWeek, targetDay) {
+      if (!swapSource) return;
+
+      const sourceMeal = { ...currentMenuData[swapSource.week][swapSource.day] };
+      const targetMeal = { ...currentMenuData[targetWeek][targetDay] };
+
+      currentMenuData[swapSource.week][swapSource.day] = targetMeal;
+      currentMenuData[targetWeek][targetDay] = sourceMeal;
+
+      saveMenuData(currentMenuData);
+      closeSwapModal();
+      renderMenu();
+    }
+
+    /* Grocery List & Custom Items */
+    function getCustomGroceries(weekNum) {
+      const key = `custom_groceries_w${weekNum}`;
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    function saveCustomGroceries(weekNum, items) {
+      localStorage.setItem(`custom_groceries_w${weekNum}`, JSON.stringify(items));
+    }
+
+    function handleAddGroceryItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('custom-grocery-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const list = getCustomGroceries(activeWeek);
+      list.push({ text: text, checked: false });
+      saveCustomGroceries(activeWeek, list);
+
+      input.value = '';
+      renderGroceries();
+    }
+
+    function toggleCustomGroceryItem(weekNum, idx) {
+      const list = getCustomGroceries(weekNum);
+      if (list[idx]) {
+        list[idx].checked = !list[idx].checked;
+        saveCustomGroceries(weekNum, list);
+        renderGroceries();
+      }
+    }
+
+    function deleteCustomGroceryItem(weekNum, idx) {
+      const list = getCustomGroceries(weekNum);
+      list.splice(idx, 1);
+      saveCustomGroceries(weekNum, list);
+      renderGroceries();
     }
 
     function getStorageKey(weekNum, category, index) {
@@ -336,31 +656,39 @@
     }
 
     function resetCheckedItems() {
-      const weekGroceries = menuData[activeWeek].groceries;
+      // Clear preset checked status
+      const weekGroceries = defaultMenuData[activeWeek].groceries;
       ['produce', 'meat', 'spices'].forEach(cat => {
         weekGroceries[cat].forEach((_, idx) => {
           localStorage.removeItem(getStorageKey(activeWeek, cat, idx));
         });
       });
+      // Clear custom checked items
+      const custom = getCustomGroceries(activeWeek);
+      custom.forEach(item => item.checked = false);
+      saveCustomGroceries(activeWeek, custom);
+
       renderGroceries();
     }
 
     function renderGroceries() {
-      const groceries = menuData[activeWeek].groceries;
+      const groceries = defaultMenuData[activeWeek].groceries;
       const categories = [
         { key: 'produce', title: '🥬 Fresh Produce' },
         { key: 'meat', title: '🍗 Meat & Poultry' },
         { key: 'spices', title: '🧂 Spices, Grains & Pantry' }
       ];
 
-      const content = categories.map(cat => {
+      let content = categories.map(cat => {
         const items = groceries[cat.key].map((item, idx) => {
           const checked = localStorage.getItem(getStorageKey(activeWeek, cat.key, idx)) === 'true';
           return `
-            <label class="grocery-item ${checked ? 'checked' : ''}">
-              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleGroceryItem(${activeWeek}, '${cat.key}', ${idx})">
-              <span>${item}</span>
-            </label>
+            <div class="grocery-item ${checked ? 'checked' : ''}">
+              <label class="grocery-item-left">
+                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleGroceryItem(${activeWeek}, '${cat.key}', ${idx})">
+                <span>${item}</span>
+              </label>
+            </div>
           `;
         }).join('');
 
@@ -371,6 +699,27 @@
           </div>
         `;
       }).join('');
+
+      // Add Custom items section
+      const customItems = getCustomGroceries(activeWeek);
+      if (customItems.length > 0) {
+        const customHtml = customItems.map((item, idx) => `
+          <div class="grocery-item ${item.checked ? 'checked' : ''}">
+            <label class="grocery-item-left">
+              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCustomGroceryItem(${activeWeek}, ${idx})">
+              <span>${item.text}</span>
+            </label>
+            <button class="delete-item-btn" title="Delete" onclick="deleteCustomGroceryItem(${activeWeek}, ${idx})">&times;</button>
+          </div>
+        `).join('');
+
+        content += `
+          <div class="grocery-section">
+            <div class="grocery-section-title">✨ Added Extras (Week ${activeWeek})</div>
+            ${customHtml}
+          </div>
+        `;
+      }
 
       document.getElementById('grocery-list-content').innerHTML = content;
     }
