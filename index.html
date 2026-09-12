@@ -18,6 +18,9 @@
       --border: #e2e8f0;
       --active: #fef3c7;
       --danger: #ef4444;
+      --prep-bg: #f0fdf4;
+      --prep-border: #86efac;
+      --prep-text: #166534;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -54,6 +57,54 @@
       background: var(--primary);
       color: white;
       border-color: var(--primary);
+    }
+
+    /* Weekend Lunch Prep Card */
+    .prep-card {
+      background: var(--prep-bg);
+      border: 1.5px solid var(--prep-border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .prep-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--prep-text);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .prep-options-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+    .prep-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: white;
+      border: 1px solid var(--prep-border);
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .prep-chip input {
+      accent-color: #16a34a;
+      cursor: pointer;
+    }
+    .prep-chip.selected {
+      background: #dcfce7;
+      border-color: #22c55e;
+      font-weight: 600;
+      color: #14532d;
     }
     
     /* Dessert Card */
@@ -278,7 +329,7 @@
       background: none;
       border: none;
       color: var(--danger);
-      font-size: 1rem;
+      font-size: 1.1rem;
       cursor: pointer;
       padding: 0 0.4rem;
     }
@@ -346,6 +397,7 @@
 
   <!-- Menu View -->
   <div id="schedule-container">
+    <div class="prep-card" id="prep-card-container"></div>
     <div class="dessert-card" id="dessert-card-container"></div>
     <div id="days-container"></div>
   </div>
@@ -427,7 +479,38 @@
       }
     };
 
-    // Load active meals from storage or fallback to defaults
+    // Ingredient recipes for school meal prep
+    const mealPrepLibrary = {
+      "spring rolls": {
+        name: "Spring Rolls",
+        groceries: ["Spring roll sheets / pastry wrappers", "Shredded cabbage & carrots", "Shredded chicken or minced filling", "Soy sauce & white pepper"]
+      },
+      "samosa": {
+        name: "Samosa",
+        groceries: ["Samosa patti / pastry dough", "Potatoes (aloo) or minced meat (qeema)", "Cumin seeds & Chaat masala", "Fresh coriander & green peas"]
+      },
+      "mini pizza": {
+        name: "Mini Pizza",
+        groceries: ["Mini pizza bases or dough flour", "Pizza sauce", "Shredded mozzarella cheese", "Pizza toppings (chicken chunks, olives, sweetcorn)"]
+      },
+      "chicken bread": {
+        name: "Chicken Bread",
+        groceries: ["All-purpose flour (maida) & yeast", "Shredded cooked chicken", "Milk, butter & egg (for wash)", "Sesame seeds (til)"]
+      },
+      "cookies": {
+        name: "Cookies",
+        groceries: ["Butter & brown sugar", "Chocolate chips", "Vanilla extract", "Baking powder & flour"]
+      },
+      "brownies": {
+        name: "Brownies",
+        groceries: ["Dark chocolate / Cocoa powder", "Butter & eggs", "Granulated sugar", "Flour"]
+      },
+      "chocolate balls": {
+        name: "Chocolate Balls",
+        groceries: ["Marie / digestive biscuits", "Condensed milk", "Cocoa powder", "Sprinkles or desiccated coconut"]
+      }
+    };
+
     function getMenuData() {
       const stored = localStorage.getItem('monthly_menu_data');
       if (stored) {
@@ -474,6 +557,53 @@
       document.getElementById('grocery-week-indicator').innerText = `Week ${activeWeek} Grocery List`;
     }
 
+    /* Weekend Meal Prep Functions */
+    function getSelectedMealPrep(weekNum) {
+      const saved = localStorage.getItem(`meal_prep_week_${weekNum}`);
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      return [];
+    }
+
+    function toggleMealPrepOption(weekNum, key) {
+      let selected = getSelectedMealPrep(weekNum);
+      if (selected.includes(key)) {
+        selected = selected.filter(item => item !== key);
+      } else {
+        selected.push(key);
+      }
+      localStorage.setItem(`meal_prep_week_${weekNum}`, JSON.stringify(selected));
+      renderPrepCard();
+    }
+
+    function renderPrepCard() {
+      const selected = getSelectedMealPrep(activeWeek);
+      const options = Object.keys(mealPrepLibrary);
+
+      const chipsHtml = options.map(key => {
+        const isChecked = selected.includes(key);
+        const item = mealPrepLibrary[key];
+        return `
+          <label class="prep-chip ${isChecked ? 'selected' : ''}">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleMealPrepOption(${activeWeek}, '${key}')">
+            <span>${item.name}</span>
+          </label>
+        `;
+      }).join('');
+
+      const html = `
+        <div class="prep-header">
+          <span>🎒 School Lunch Prep (Weekend)</span>
+          <span style="font-size:0.75rem; font-weight: normal; color: var(--prep-text);">Multiple Choice</span>
+        </div>
+        <div class="prep-options-grid">
+          ${chipsHtml}
+        </div>
+      `;
+      document.getElementById('prep-card-container').innerHTML = html;
+    }
+
     /* Dessert Functions */
     function getDessert(weekNum) {
       const saved = localStorage.getItem(`dessert_week_${weekNum}`);
@@ -518,6 +648,7 @@
 
     /* Menu & Day Rendering */
     function renderMenu() {
+      renderPrepCard();
       renderDessertCard();
       const currentAutoWeek = getCurrentWeek();
       const week = currentMenuData[activeWeek];
@@ -655,12 +786,26 @@
       renderGroceries();
     }
 
+    function togglePrepGroceryItem(weekNum, itemText) {
+      const key = `grocery_prep_w${weekNum}_${itemText}`;
+      const isChecked = localStorage.getItem(key) === 'true';
+      localStorage.setItem(key, (!isChecked).toString());
+      renderGroceries();
+    }
+
     function resetCheckedItems() {
       // Clear preset checked status
       const weekGroceries = defaultMenuData[activeWeek].groceries;
       ['produce', 'meat', 'spices'].forEach(cat => {
         weekGroceries[cat].forEach((_, idx) => {
           localStorage.removeItem(getStorageKey(activeWeek, cat, idx));
+        });
+      });
+      // Clear meal prep checked items
+      const selectedPreps = getSelectedMealPrep(activeWeek);
+      selectedPreps.forEach(key => {
+        mealPrepLibrary[key].groceries.forEach(item => {
+          localStorage.removeItem(`grocery_prep_w${activeWeek}_${item}`);
         });
       });
       // Clear custom checked items
@@ -672,6 +817,41 @@
     }
 
     function renderGroceries() {
+      let content = '';
+
+      // Meal Prep Groceries Section (if any selected)
+      const selectedPreps = getSelectedMealPrep(activeWeek);
+      if (selectedPreps.length > 0) {
+        // Collect all prep groceries (avoiding duplicate names if multiple selected)
+        const prepGroceries = [];
+        selectedPreps.forEach(key => {
+          mealPrepLibrary[key].groceries.forEach(item => {
+            if (!prepGroceries.includes(item)) prepGroceries.push(item);
+          });
+        });
+
+        const prepItemsHtml = prepGroceries.map(item => {
+          const key = `grocery_prep_w${activeWeek}_${item}`;
+          const checked = localStorage.getItem(key) === 'true';
+          return `
+            <div class="grocery-item ${checked ? 'checked' : ''}">
+              <label class="grocery-item-left">
+                <input type="checkbox" ${checked ? 'checked' : ''} onchange="togglePrepGroceryItem(${activeWeek}, '${item.replace(/'/g, "\\'")}')">
+                <span>${item}</span>
+              </label>
+            </div>
+          `;
+        }).join('');
+
+        content += `
+          <div class="grocery-section" style="border-left: 4px solid #22c55e;">
+            <div class="grocery-section-title" style="color: #166534;">🥪 Lunch Prep Groceries</div>
+            ${prepItemsHtml}
+          </div>
+        `;
+      }
+
+      // Default Menu Groceries
       const groceries = defaultMenuData[activeWeek].groceries;
       const categories = [
         { key: 'produce', title: '🥬 Fresh Produce' },
@@ -679,7 +859,7 @@
         { key: 'spices', title: '🧂 Spices, Grains & Pantry' }
       ];
 
-      let content = categories.map(cat => {
+      content += categories.map(cat => {
         const items = groceries[cat.key].map((item, idx) => {
           const checked = localStorage.getItem(getStorageKey(activeWeek, cat.key, idx)) === 'true';
           return `
@@ -700,7 +880,7 @@
         `;
       }).join('');
 
-      // Add Custom items section
+      // Custom Added Items Section
       const customItems = getCustomGroceries(activeWeek);
       if (customItems.length > 0) {
         const customHtml = customItems.map((item, idx) => `
