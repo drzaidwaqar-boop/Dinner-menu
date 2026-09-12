@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dinner Menu & Groceries</title>
+  <meta name="theme-color" content="#d97706">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Dinner%20Menu%22%2C%22short_name%22%3A%22Menu%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23d97706%22%7D">
+  <style>
+    :root {
+      --primary: #d97706;
+      --primary-dark: #b45309;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --active: #fef3c7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem 1rem 5rem 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 0.5rem 0 1rem 0;
+    }
+    h1 { font-size: 1.4rem; color: var(--primary); }
+    .week-indicator { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
+    
+    .nav-weeks {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0.75rem 0 1.25rem 0;
+      justify-content: center;
+    }
+    .week-btn {
+      padding: 0.4rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--card);
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .week-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .day-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .day-card.today {
+      border: 2px solid var(--primary);
+      background: var(--active);
+    }
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge {
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+    .badge-cook { background: #fee2e2; color: #b91c1c; }
+    .badge-leftover { background: #e0f2fe; color: #0369a1; }
+    .badge-out { background: #fef08a; color: #854d0e; }
+
+    .dish-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 0.25rem;
+    }
+    .dish-sides {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Grocery List Styles */
+    .grocery-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .grocery-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+    .grocery-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.45rem 0;
+      font-size: 0.95rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grocery-item input[type="checkbox"] {
+      width: 1.15rem;
+      height: 1.15rem;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .grocery-item.checked span {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .grocery-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+    .reset-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.6rem 0;
+      max-width: 500px;
+      margin: 0 auto;
+      z-index: 100;
+    }
+    .nav-tab {
+      background: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .nav-tab.active {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="view-title">Weekly Dinner Menu</h1>
+    <div class="week-indicator" id="current-cycle">Loading schedule...</div>
+  </header>
+
+  <div class="nav-weeks">
+    <button class="week-btn" onclick="selectWeek(1)">Week 1</button>
+    <button class="week-btn" onclick="selectWeek(2)">Week 2</button>
+    <button class="week-btn" onclick="selectWeek(3)">Week 3</button>
+    <button class="week-btn" onclick="selectWeek(4)">Week 4</button>
+  </div>
+
+  <!-- Menu View -->
+  <div id="schedule-container"></div>
+
+  <!-- Grocery View -->
+  <div id="grocery-container" style="display: none;">
+    <div class="grocery-actions">
+      <button class="reset-btn" onclick="resetCheckedItems()">Clear Checked Items</button>
+    </div>
+    <div id="grocery-list-content"></div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" id="tab-menu" onclick="switchView('menu')">
+      📅 Menu
+    </button>
+    <button class="nav-tab" id="tab-grocery" onclick="switchView('grocery')">
+      🛒 Grocery List
+    </button>
+  </nav>
+
+  <script>
+    const menuData = {
+      1: {
+        sat: { dish: "Chicken Pulao", sides: "Served with Raita", cook: true },
+        mon: { dish: "Desi-Style Chicken Pasta", sides: "Spicy stir-fry macaroni", cook: true },
+        wed: { dish: "Yellow Dal Tadka", sides: "Served with Steamed Rice or Roti", cook: true },
+        groceries: {
+          produce: ["Onions (1 kg)", "Tomatoes (500g)", "Ginger & Garlic paste", "Green Chilies", "Cilantro (Dhaniya)", "Cucumber & Mint (for Raita)", "Bell Peppers (Capsicum)"],
+          meat: ["Bone-in Chicken (1 kg - for Pulao)", "Boneless Chicken Breast (500g - diced for Pasta)"],
+          spices: ["Basmati Rice", "Macaroni / Penne Pasta", "Yellow Lentils (Moong / Masoor Dal)", "Whole Garam Masala (Cumin, Cloves, Cardamom)", "Chili Flakes & Chaat Masala", "Yogurt (Dahi)"]
+        }
+      },
+      2: {
+        sat: { dish: "Chicken Karahi", sides: "Served with Naan or Roti", cook: true },
+        mon: { dish: "Chicken Chow Mein", sides: "Pakistani-style spicy Chinese noodles", cook: true },
+        wed: { dish: "Bhindi Masala (Okra)", sides: "Served with hot Phulkas/Roti", cook: true },
+        groceries: {
+          produce: ["Fresh Okra / Bhindi (750g)", "Tomatoes (1 kg)", "Onions (1 kg)", "Cabbage", "Carrots", "Bell Peppers", "Spring Onions", "Ginger (julienned)"],
+          meat: ["Karahi-cut Chicken (1 kg)", "Boneless Chicken Strips (400g)"],
+          spices: ["Egg Noodles or Spaghetti", "Soy Sauce, Chili Sauce & Vinegar", "Crushed Red Pepper & Black Pepper", "Karahi Masala / Crushed Coriander & Cumin", "Cooking Oil / Ghee"]
+        }
+      },
+      3: {
+        sat: { dish: "Chicken or Meat Biryani", sides: "Monthly special treat + Raita", cook: true },
+        mon: { dish: "Indo-Pak Chili Chicken", sides: "Served with Egg Fried Rice", cook: true },
+        wed: { dish: "Baingan Ka Salan (Eggplant)", sides: "Served with Roti", cook: true },
+        groceries: {
+          produce: ["Eggplants / Baingan (500g)", "Onions (1.5 kg)", "Tomatoes (750g)", "Green Chilies & Fresh Mint", "Garlic cloves", "Spring Onions"],
+          meat: ["Biryani-cut Chicken or Mutton (1 kg)", "Boneless Chicken Cubes (500g)"],
+          spices: ["Aged Sella or Basmati Rice", "Eggs (for Fried Rice)", "Biryani Masala & Kewra Water", "Cornflour / Cornstarch", "Soy Sauce & Hot Sauce", "Mustard seeds / Fenugreek seeds (for Salan)", "Yogurt (500g)"]
+        }
+      },
+      4: {
+        sat: { dish: "Chicken Salan (Shorba)", sides: "Homestyle chicken curry + Roti", cook: true },
+        mon: { dish: "Baked Pakistani Chicken Pasta", sides: "Cheesy or white-sauce desi style", cook: true },
+        wed: { dish: "Mixed / Kaali Dal", sides: "Served with Steamed Rice & Pickles", cook: true },
+        groceries: {
+          produce: ["Potatoes (optional for Salan)", "Onions (1 kg)", "Tomatoes (500g)", "Cilantro & Green Chilies", "Garlic & Ginger"],
+          meat: ["Curry-cut Chicken (1 kg)", "Boneless Shredded Chicken (400g)"],
+          spices: ["Urad Dal / Mixed Dal", "Pasta (Penne or Elbow)", "Milk, Butter & All-Purpose Flour", "Shredded Mozzarella / Cheddar", "Turmeric, Red Chili Powder & Coriander Powder", "Basmati Rice"]
+        }
+      }
+    };
+
+    function getCurrentWeek() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 1);
+      const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
+      const weekNumber = Math.ceil((days + start.getDay() + 1) / 7);
+      return ((weekNumber - 1) % 4) + 1;
+    }
+
+    let activeWeek = getCurrentWeek();
+    let currentView = 'menu';
+    const todayIndex = new Date().getDay();
+
+    function selectWeek(weekNum) {
+      activeWeek = weekNum;
+      updateHeader();
+      if (currentView === 'menu') {
+        renderMenu();
+      } else {
+        renderGroceries();
+      }
+    }
+
+    function updateHeader() {
+      document.querySelectorAll('.week-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx + 1 === activeWeek);
+      });
+      const currentAutoWeek = getCurrentWeek();
+      document.getElementById('current-cycle').innerText = 
+        activeWeek === currentAutoWeek ? `Week ${activeWeek} (Current Active Cycle)` : `Viewing Week ${activeWeek}`;
+    }
+
+    function renderMenu() {
+      const currentAutoWeek = getCurrentWeek();
+      const week = menuData[activeWeek];
+      const days = [
+        { name: "Saturday", dayId: 6, ...week.sat, type: "cook" },
+        { name: "Sunday", dayId: 0, dish: `${week.sat.dish} (Leftovers)`, sides: week.sat.sides, type: "leftover" },
+        { name: "Monday", dayId: 1, ...week.mon, type: "cook" },
+        { name: "Tuesday", dayId: 2, dish: `${week.mon.dish} (Leftovers)`, sides: week.mon.sides, type: "leftover" },
+        { name: "Wednesday", dayId: 3, ...week.wed, type: "cook" },
+        { name: "Thursday", dayId: 4, dish: `${week.wed.dish} (Leftovers)`, sides: week.wed.sides, type: "leftover" },
+        { name: "Friday", dayId: 5, dish: "Dining Out / Takeout 🎉", sides: "Kitchen closed! No cooking or dishes.", type: "out" }
+      ];
+
+      const container = document.getElementById('schedule-container');
+      container.innerHTML = days.map(d => {
+        const isToday = (activeWeek === currentAutoWeek && d.dayId === todayIndex);
+        let badgeLabel = d.type === "cook" ? "Cook Fresh" : (d.type === "leftover" ? "Leftovers" : "Eat Out");
+        let badgeClass = `badge-${d.type}`;
+
+        return `
+          <div class="day-card ${isToday ? 'today' : ''}">
+            <div class="day-header">
+              <span>${d.name} ${isToday ? '• TODAY' : ''}</span>
+              <span class="badge ${badgeClass}">${badgeLabel}</span>
+            </div>
+            <div class="dish-name">${d.dish}</div>
+            <div class="dish-sides">${d.sides}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getStorageKey(weekNum, category, index) {
+      return `grocery_w${weekNum}_${category}_${index}`;
+    }
+
+    function toggleGroceryItem(weekNum, category, index) {
+      const key = getStorageKey(weekNum, category, index);
+      const isChecked = localStorage.getItem(key) === 'true';
+      localStorage.setItem(key, (!isChecked).toString());
+      renderGroceries();
+    }
+
+    function resetCheckedItems() {
+      const weekGroceries = menuData[activeWeek].groceries;
+      ['produce', 'meat', 'spices'].forEach(cat => {
+        weekGroceries[cat].forEach((_, idx) => {
+          localStorage.removeItem(getStorageKey(activeWeek, cat, idx));
+        });
+      });
+      renderGroceries();
+    }
+
+    function renderGroceries() {
+      const groceries = menuData[activeWeek].groceries;
+      const categories = [
+        { key: 'produce', title: '🥬 Fresh Produce' },
+        { key: 'meat', title: '🍗 Meat & Poultry' },
+        { key: 'spices', title: '🧂 Spices, Grains & Pantry' }
+      ];
+
+      const content = categories.map(cat => {
+        const items = groceries[cat.key].map((item, idx) => {
+          const checked = localStorage.getItem(getStorageKey(activeWeek, cat.key, idx)) === 'true';
+          return `
+            <label class="grocery-item ${checked ? 'checked' : ''}">
+              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleGroceryItem(${activeWeek}, '${cat.key}', ${idx})">
+              <span>${item}</span>
+            </label>
+          `;
+        }).join('');
+
+        return `
+          <div class="grocery-section">
+            <div class="grocery-section-title">${cat.title}</div>
+            ${items}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('grocery-list-content').innerHTML = content;
+    }
+
+    function switchView(view) {
+      currentView = view;
+      const isMenu = view === 'menu';
+      document.getElementById('schedule-container').style.display = isMenu ? 'block' : 'none';
+      document.getElementById('grocery-container').style.display = isMenu ? 'none' : 'block';
+      document.getElementById('tab-menu').classList.toggle('active', isMenu);
+      document.getElementById('tab-grocery').classList.toggle('active', !isMenu);
+      document.getElementById('view-title').innerText = isMenu ? 'Weekly Dinner Menu' : 'Weekly Grocery List';
+
+      if (isMenu) {
+        renderMenu();
+      } else {
+        renderGroceries();
+      }
+    }
+
+    // Initialize
+    updateHeader();
+    renderMenu();
+  </script>
+</body>
+</html>
